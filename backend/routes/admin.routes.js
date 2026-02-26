@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
+const Transaction = require("../models/Transaction");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
@@ -18,6 +19,19 @@ router.get("/users", auth, verifyAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password");
     res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ================= GET ALL TRANSACTIONS (ADMIN) =================
+router.get("/all-transactions", auth, verifyAdmin, async (req, res) => {
+  try {
+    const items = await Transaction.find()
+      .populate("user", "email username")
+      .sort({ createdAt: -1 });
+    res.json(items);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

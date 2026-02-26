@@ -6,8 +6,13 @@ const AdminTransactions = () => {
   const [search, setSearch] = useState("");
 
   const fetchTransactions = async () => {
-    const res = await api.get("/admin/all-transactions");
-    setTransactions(res.data);
+    try {
+      const res = await api.get("/admin/all-transactions");
+      setTransactions(res.data || []);
+    } catch (err) {
+      console.error("Failed to load admin transactions", err?.response?.data || err.message);
+      setTransactions([]);
+    }
   };
 
   useEffect(() => {
@@ -15,7 +20,7 @@ const AdminTransactions = () => {
   }, []);
 
   const filtered = transactions.filter((t) =>
-    t.email?.toLowerCase().includes(search.toLowerCase())
+    (t.user?.email || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (

@@ -52,7 +52,7 @@ const Landing = () => {
 
       <section className="landing-hero">
         <div className="landing-hero-content">
-          <h1 className="landing-hero-title">Spend your money charily!</h1>
+          <h1 className="landing-hero-title">Spend your money Tracky!</h1>
           <p className="landing-hero-desc">
             Keep track of your daily spendings with Tracky; visualize your expenses
             and make budgeting plans to achieve your money-saving goals.

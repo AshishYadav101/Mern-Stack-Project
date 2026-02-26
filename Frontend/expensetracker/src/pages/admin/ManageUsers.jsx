@@ -18,6 +18,7 @@
 
 
 import { useReducer, useEffect } from "react";
+import api from "../../api/axios";
 
 const initialState = {
   users: [],
@@ -32,16 +33,6 @@ function reducer(state, action) {
     case "SET_SEARCH":
       return { ...state, search: action.payload };
 
-    case "TOGGLE_STATUS":
-      return {
-        ...state,
-        users: state.users.map((u) =>
-          u.id === action.payload
-            ? { ...u, status: u.status === "Enabled" ? "Disabled" : "Enabled" }
-            : u
-        ),
-      };
-
     default:
       return state;
   }
@@ -51,41 +42,20 @@ const ManageUsers = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const data = [
-      {
-        id: "U00003",
-        name: "John Doe",
-        email: "xofaxip603@giratex.com",
-        expense: 7000,
-        income: 15000,
-        transactions: 8,
-        status: "Enabled",
-      },
-      {
-        id: "U00005",
-        name: "John",
-        email: "john@abc.com",
-        expense: 0,
-        income: 0,
-        transactions: 0,
-        status: "Enabled",
-      },
-      {
-        id: "U00007",
-        name: "mywork",
-        email: "workm3410@gmail.com",
-        expense: 1456,
-        income: 5000,
-        transactions: 3,
-        status: "Enabled",
-      },
-    ];
-
-    dispatch({ type: "SET_USERS", payload: data });
+    const loadUsers = async () => {
+      try {
+        const res = await api.get("/admin/users");
+        dispatch({ type: "SET_USERS", payload: res.data || [] });
+      } catch (err) {
+        console.error("Failed to load admin users", err?.response?.data || err.message);
+        dispatch({ type: "SET_USERS", payload: [] });
+      }
+    };
+    loadUsers();
   }, []);
 
   const filtered = state.users.filter((u) =>
-    u.email.toLowerCase().includes(state.search.toLowerCase())
+    (u.email || "").toLowerCase().includes(state.search.toLowerCase())
   );
 
   // styles
@@ -168,29 +138,11 @@ const ManageUsers = () => {
         </thead>
         <tbody>
           {filtered.map((u) => (
-            <tr key={u.id}>
-              <td style={td}>{u.id}</td>
-              <td style={td}>{u.name}</td>
+            <tr key={u._id}>
+              <td style={td}>{u._id}</td>
+              <td style={td}>{u.username || "-"}</td>
               <td style={td}>{u.email}</td>
-              <td style={td}>Rs. {u.expense}</td>
-              <td style={td}>Rs. {u.income}</td>
-              <td style={td}>{u.transactions}</td>
-              <td style={{ ...td, ...statusStyle }}>
-                {u.status}
-              </td>
-              <td style={td}>
-                <button
-                  style={disableBtn}
-                  onClick={() =>
-                    dispatch({
-                      type: "TOGGLE_STATUS",
-                      payload: u.id,
-                    })
-                  }
-                >
-                  {u.status === "Enabled" ? "Disable" : "Enable"}
-                </button>
-              </td>
+              <td style={td}>{u.isAdmin ? "Admin" : "User"}</td>
             </tr>
           ))}
         </tbody>
